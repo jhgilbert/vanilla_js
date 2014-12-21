@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Amnesia Blog: Vent It and Forget It!</title>
+        <style>
+            #post-form {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <!-- blog form -->
+        <button id="new-post">New Post</button>
+        <div id="post-form">
+            <form action="#">
+                <input placeholder="title" type="text" id="post-title-input" /><br>
+                <textarea id="post-body-input"></textarea><br>
+                <button id="save-post">Save</button>
+                <button id="discard-post">Discard</button>
+            </form>
+        </div>
+        <script>
+            var posts = [];
+            
+            function BlogPost(title, body) {
+                this.title = title;
+                this.body = body;
+                this.created_at = new Date();
+                this.displayDate = function() {
+                    return this.created_at.toDateString();
+                }
+            }
+            
+            function initNewPost() {
+                document.getElementById("new-post").style.display = "none";
+                document.getElementById("post-form").style.display = "block";
+            }
+            
+            function cancelPost() {
+                document.getElementById("post-title-input").value = "";
+                document.getElementById("post-body-input").value = "";
+                document.getElementById("post-form").style.display = "none";
+                document.getElementById("new-post").style.display = "block";
+            }
+            
+            function savePost() {
+                console.log("Post would be processed.");
+            }
+            
+            var newPostButton = document.getElementById("new-post");
+            newPostButton.onclick = initNewPost;
+            
+            var discardPostButton = document.getElementById("discard-post");
+            discardPostButton.onclick = cancelPost;
+            
+            var savePostButton = document.getElementById("save-post");
+            savePostButton.onclick = savePost;
+            
+        </script>
+    </body>
+</html>
