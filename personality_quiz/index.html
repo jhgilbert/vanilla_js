@@ -13,8 +13,19 @@
             function getData() {
                 var theForm = document.forms.theForm;
                 var color = theForm.elements.color.value;
+                var aboutme = theForm.elements.aboutme.value;
+                var birthday = theForm.elements.date.value;
                 var results = document.getElementById("results");
-                results.innerHTML = "Favorite color: " + color;
+                results.innerHTML = "Favorite color: " + color + "<br>";
+                results.innerHTML += "About me: " + aboutme + "<br>";
+                results.innerHTML += "Birthday: " + birthday + "<br>";
+                
+                var personalityArray = theForm.elements.personality;
+                for (var i = 0; i < personalityArray.length; i++) {
+                    if (personalityArray[i].checked) {
+                        results.innerHTML += "Personality item: " + personalityArray[i].value + "<br>";
+                    }
+                }
             }      
         </script>
     </head>
