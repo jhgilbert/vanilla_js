@@ -1,0 +1,1 @@
+This project is not original material — it’s from O’Reilly’s online introductory JavaScript course.
