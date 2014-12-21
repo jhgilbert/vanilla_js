@@ -10,6 +10,7 @@
             #post-form {
                 width: 500px;
                 display: none;
+                padding-bottom: 20px;
             }
             
             #post-form h3 {
@@ -48,6 +49,8 @@
                 <button id="discard-post">Discard</button>
             </form>
         </div>
+        <h2>Posts</h2>
+        <div id="post-listing"></div>
         <script>
             var posts = [];
             
@@ -85,9 +88,29 @@
             }
             
             function savePost() {
+                var title = document.getElementById("post-title-input").value;
+                var body = document.getElementById("post-body-input").value;
+                var b = new BlogPost(title, body);
+                addToPostList(b);
                 clearNewPostForm();
                 hideNewPostForm();
-                console.log("Post would be processed.");
+            }
+            
+            function generatePostTemplate(blogPost) {
+                var template = "<hr>";
+                template += "<h4>" + blogPost.title + "</h4>";
+                template += "<div>" + blogPost.body + "</div>";
+                return template;
+            }
+            
+            function addToPostList(post) {
+                posts.push(post);
+                var postListing = document.getElementById("post-listing");
+                postListing.innerHTML = "";
+                for (var i = 0; i < posts.length; i++) {
+                    var thisPost = posts[i];
+                    postListing.innerHTML += generatePostTemplate(thisPost);
+                }
             }
             
             var newPostButton = document.getElementById("new-post");
