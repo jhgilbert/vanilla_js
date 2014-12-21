@@ -31,19 +31,33 @@
                 }
             }
             
-            function initNewPost() {
-                document.getElementById("new-post").style.display = "none";
-                document.getElementById("post-form").style.display = "block";
-            }
-            
-            function cancelPost() {
+            function clearNewPostForm() {
                 document.getElementById("post-title-input").value = "";
                 document.getElementById("post-body-input").value = "";
+            }
+            
+            function hideNewPostForm() {
                 document.getElementById("post-form").style.display = "none";
                 document.getElementById("new-post").style.display = "block";
             }
             
+            function showNewPostForm() {
+                document.getElementById("new-post").style.display = "none";
+                document.getElementById("post-form").style.display = "block";
+            }
+            
+            function initNewPost() {
+                showNewPostForm();
+            }
+            
+            function cancelPost() {
+                clearNewPostForm();
+                hideNewPostForm();
+            }
+            
             function savePost() {
+                clearNewPostForm();
+                hideNewPostForm();
                 console.log("Post would be processed.");
             }
             
