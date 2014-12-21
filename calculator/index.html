@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Basic Calculator</title>
+    <style>
+        body {
+            width: 400px;
+            margin: 40px auto;
+        }
+        
+        button {
+            width: 100px;
+            height: 100px;
+            font-size: 30px;
+        }
+        
+        button.double-width {
+            width: 200px;
+        }
+        
+        button.triple-width {
+            width: 300px;
+        }
+        
+        #answer-window {
+            background-color: #EBFFEB;
+            width: 400px;
+            height: 100px;
+            text-align: right;
+            font-size: 35px;
+            padding: 5px;
+            border: 2px solid black;
+            box-sizing: border-box;
+            font-family: monospace;
+        }
+    </style>
+</head>
+    <body>
+        <div id="answer-window">0</div>
+        
+        <button>7</button><button>8</button><button>9</button><button>x</button><br>
+        <button>4</button><button>5</button><button>6</button><button>-</button><br>
+        <button>1</button><button>2</button><button>3</button><button>+</button><br>
+        <button class="double-width">0</button><button>=</button><button>%</button>
+        
+        <script>            
+            var buttonPresses = [];
+            
+            /* 
+              Executes the operation, add a button press to the chain, 
+              or does nothing (when button press is invalid).
+            */
+            function processButtonClick(event) {
+                var buttonVal = event.target.innerHTML;
+                
+                if (buttonVal == '=') {
+                    executeOperation();
+                    return;       
+                } else {
+                    // do not add operator if it's the first in the chain
+                    if (buttonPresses.length == 0 && isOperator(buttonVal)) {
+                        return;
+                    }
+                    // do not add operator if previous item was an operator
+                    if (isOperator(buttonVal) 
+                        && isOperator(buttonPresses[buttonPresses.length - 1])) {
+                        return;
+                    }
+                    // add the button value to the chain
+                    buttonPresses.push(buttonVal);
+                    
+                    // update the display with the latest button press
+                    var ansWindow = document.getElementById("answer-window");
+                    ansWindow.innerHTML = parseButtonPresses(buttonPresses).join(" ") || 0;
+                }
+            }
+            
+            // add event listener to all calculator buttons
+            var buttons = document.getElementsByTagName("button");
+            for (var i = 0; i < buttons.length; i++) {
+                buttons[i].onclick = processButtonClick;
+            }
+            
+            /*
+              Executes all the operations shown in the display window,
+              updates the answer in the display window,
+              and resets the calculator.
+            */
+            function executeOperation() {
+                // do nothing if no operation is to be executed
+                if (buttonPresses.length == 0) {
+                    return;
+                }
+                
+                var operationChain = parseButtonPresses(buttonPresses);
+                
+                // strip trailing operator
+                if (isOperator(operationChain[operationChain.length - 1])) {
+                    operationChain.splice(operationChain.length - 1, 1);
+                }
+                
+                // "soak up" operators according to order of operations
+                operationChain = divideAndMultiply(operationChain);
+                operationChain = addAndSubtract(operationChain);
+
+                // display answer
+                var ansWindow = document.getElementById("answer-window");
+                ansWindow.innerHTML = operationChain[0];
+                
+                // reset calculator
+                buttonPresses = [];
+            }
+                
+            /*
+                Determines whether a character is a mathematical operator.
+            */
+            function isOperator(char) {
+                var operators = ['-','+','%','x'];
+                return (operators.indexOf(char) != -1);
+            }
+            
+            /* 
+               Condenses buttonpress array into array of logical operations.
+               Example input: ["1","2","+","5"]
+               Example output: [12, "+", 5]
+            */
+            function parseButtonPresses() {
+                var parsedOperation = [];
+                var activeIdx = 0;
+                for (var i = 0; i < buttonPresses.length; i++) {
+                    var entry = buttonPresses[i];                    
+                    // add operator
+                    if (isOperator(entry)) {
+                        parsedOperation.push(entry);
+                        activeIdx += 2;
+                    // add integer (after converting from string)
+                    } else {
+                        if (parsedOperation.length == activeIdx) {
+                            parsedOperation.push(parseInt(entry));
+                        } else {
+                            parsedOperation[activeIdx] += parseInt(entry);
+                        }
+                    }
+                }
+                return parsedOperation;
+            }
+            
+            /* 
+              Strips trailing operators from an array.
+            */
+            function stripTrailingOperators(arr) {
+                var lastWasOperator = false;
+                do {
+                    var lastItem = arr[arr.length - 1];
+                    if (isOperator(lastItem)) {
+                        arr.splice(arr.length - 1, 1);
+                        lastWasOperator = true;
+                    } else {
+                        lastWasOperator = false;
+                    }
+                } while (lastWasOperator);
+                return arr;
+            }
+            
+            /* 
+              Replaces an operator with the result of its operation,
+              and removes the numbers to its left and its right.
+              Example input: [2, '*', 5], 1, 10
+              Example output: [5]
+            */
+            function replaceOperationWithResult(arr, operatorIdx, result) {
+                arr[operatorIdx] = result;
+                arr.splice(operatorIdx-1, 1);
+                arr.splice(operatorIdx, 1);
+                return arr;
+            }
+            
+            /* 
+              Executes division and multiplication operations in an array
+              and returns a condensed array.
+              Example input: [5, "-", 2, "*", 3]
+              Example output: [5, "-", 6]
+            */
+            function divideAndMultiply(arr) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (['x','%'].indexOf(arr[i]) != -1) {
+                        var sign = arr[i];
+                        var firstNum = arr[i - 1];
+                        var secondNum = arr[i + 1];
+                        var result;
+                        if (sign == "%") {
+                            result = firstNum / secondNum;
+                        } else {
+                            result = firstNum * secondNum;
+                        }
+                        arr = replaceOperationWithResult(arr, i, result);
+                        // rewind to account for shortened array
+                        i -= 1;
+                    } 
+                }
+                return arr;
+            }
+            
+            /* 
+              Executes addition and subtraction operations in an array
+              and returns a condensed array.
+              Example input: [5, "-", 2]
+              Example output: [3]
+            */
+            function addAndSubtract(arr) {
+                for (var i = 0; i < arr.length; i++) {
+                    if (['+','-'].indexOf(arr[i]) != -1) {
+                        var sign = arr[i];
+                        var firstNum = arr[i - 1];
+                        var secondNum = arr[i + 1];
+                        var result;
+                        if (sign == "+") {
+                            result = firstNum + secondNum;
+                        } else {
+                            result = firstNum - secondNum;
+                        }
+                        arr = replaceOperationWithResult(arr, i, result);
+                        // rewind to account for shortened array
+                        i -= 1;
+                    } 
+                }
+                return arr;
+            }
+        </script>
+    </body>
+</html>
